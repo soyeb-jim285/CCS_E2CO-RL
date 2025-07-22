@@ -1,7 +1,7 @@
-# CCS_E2CO-RL
+# CCS_E2CO-RL  (under construction)
 
 Code for 
-["Optimization of pressure management strategies for geological CO2 storage using surrogate model-based reinforcement learning"]((https://www.sciencedirect.com/science/article/pii/S1750583624002056)). (under construction)
+["Optimization of pressure management strategies for geological CO2 storage using surrogate model-based reinforcement learning"]((https://www.sciencedirect.com/science/article/pii/S1750583624002056)). 
 
 
 
