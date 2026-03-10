@@ -1,0 +1,24 @@
+# Data files (too large for git)
+data/
+*.mat
+
+# Training outputs & checkpoints
+outputs/
+outputs_analysis/
+outputs_analysis_new/
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
