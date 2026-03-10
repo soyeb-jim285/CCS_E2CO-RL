@@ -139,19 +139,22 @@ class CoordinatePINNLoss(nn.Module):
             loss_yobs = loss_yobs + _l2_reg_loss(Y[i] - Y_next_pred[i])
 
         # 6-8. Autograd physics losses at collocation points
+        # Skip during inference_mode (eval) — autograd.grad requires grad tracking
         loss_pde_ag = torch.tensor(0.0, device=self.device)
         loss_mass_ag = torch.tensor(0.0, device=self.device)
         loss_darcy_ag = torch.tensor(0.0, device=self.device)
 
-        for i_step in range(len(pinn_preds)):
-            pinn_out = pinn_preds[i_step]       # (B, N, n_ch)
-            coords = collocation_coords[i_step]  # (B, N, 2), requires_grad=True
+        can_autograd = torch.is_grad_enabled() and len(pinn_preds) > 0 and pinn_preds[0].requires_grad
+        if can_autograd:
+            for i_step in range(len(pinn_preds)):
+                pinn_out = pinn_preds[i_step]       # (B, N, n_ch)
+                coords = collocation_coords[i_step]  # (B, N, 2), requires_grad=True
 
-            pde_res, mass_res, darcy_res = self._autograd_physics(
-                pinn_out, coords)
-            loss_pde_ag = loss_pde_ag + pde_res
-            loss_mass_ag = loss_mass_ag + mass_res
-            loss_darcy_ag = loss_darcy_ag + darcy_res
+                pde_res, mass_res, darcy_res = self._autograd_physics(
+                    pinn_out, coords)
+                loss_pde_ag = loss_pde_ag + pde_res
+                loss_mass_ag = loss_mass_ag + mass_res
+                loss_darcy_ag = loss_darcy_ag + darcy_res
 
         # 9. Consistency loss: CNN decoder vs PINN decoder at collocation points
         loss_consistency = torch.tensor(0.0, device=self.device)

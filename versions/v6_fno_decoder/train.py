@@ -34,6 +34,7 @@ def add_extra_args(parser):
 cfg = BaseConfig.from_args(extra_args_fn=add_extra_args)
 cfg.version_name = "v6_fno_decoder"
 cfg.use_compile = False  # torch.compile inductor can't handle cfloat parameters
+cfg.use_amp = False      # AMP GradScaler can't unscale ComplexFloat gradients
 
 print(f"=== V6 FNO Decoder E2CO ===")
 print(f"Working directory: {os.getcwd()}")
