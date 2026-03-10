@@ -186,6 +186,7 @@ class CoordinatePINNLoss(nn.Module):
 
         return total_loss, losses_stack
 
+    @torch.amp.autocast('cuda', enabled=False)
     def _autograd_physics(self, pinn_out, coords):
         """Compute autograd-based physics residuals at collocation points.
 
@@ -196,6 +197,9 @@ class CoordinatePINNLoss(nn.Module):
         Returns:
             (pressure_pde_residual, mass_conservation_residual, darcy_flux_residual)
         """
+        # Don't cast coords — they must be the SAME tensor that pinn_out was computed from
+        # (casting creates a new tensor that breaks the autograd graph)
+        # pinn_out is already float32 from the PINN decoder's autocast-disabled forward
         B, N, _ = pinn_out.shape
 
         # Extract pressure and saturation

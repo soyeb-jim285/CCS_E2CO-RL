@@ -177,12 +177,16 @@ class CoordinatePINNDecoder(nn.Module):
             nn.Linear(hidden_dim, out_channels),
         )
 
+    @torch.amp.autocast('cuda', enabled=False)
     def forward(self, z, coords):
         """
         z: (B, latent_dim)
         coords: (B, n_points, 2) with requires_grad=True for autograd
         Returns: (B, n_points, out_channels)
         """
+        # Cast z to float32 (may be fp16 from AMP), but DON'T cast coords —
+        # they must remain the same tensor for autograd.grad() to work
+        z = z.float()
         B, N, _ = coords.shape
         z_expanded = z.unsqueeze(1).expand(-1, N, -1)  # (B, N, latent_dim)
         inp = torch.cat([z_expanded, coords], dim=-1)  # (B, N, latent_dim+2)

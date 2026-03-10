@@ -109,18 +109,6 @@ class DeepONetDecoder(nn.Module):
         grid_coords = torch.stack([grid_x.flatten(), grid_y.flatten()], dim=-1)  # (Nx*Ny, 2)
         self.register_buffer('grid_coords', grid_coords)
 
-        # Cache trunk output (computed once since grid is fixed)
-        self._trunk_cache = None
-
-    def _get_trunk_output(self):
-        if self._trunk_cache is None or self._trunk_cache.device != self.grid_coords.device:
-            self._trunk_cache = self.trunk_net(self.grid_coords)  # (Nx*Ny, total_basis)
-        return self._trunk_cache
-
-    def _invalidate_cache(self):
-        """Invalidate trunk cache (call after parameter updates during training)."""
-        self._trunk_cache = None
-
     def forward(self, z):
         """z: (B, latent_dim) -> (B, n_channels, Nx, Ny)"""
         B = z.shape[0]
@@ -128,8 +116,8 @@ class DeepONetDecoder(nn.Module):
         # Branch: (B, total_basis)
         branch_out = self.branch_net(z)
 
-        # Trunk: (Nx*Ny, total_basis) - shared across batch
-        trunk_out = self._get_trunk_output()
+        # Trunk: (Nx*Ny, total_basis) - recomputed each call (no cache, compatible with torch.compile)
+        trunk_out = self.trunk_net(self.grid_coords)
 
         # Dot product: (B, Nx*Ny, n_channels)
         # Reshape: branch (B, n_channels, n_basis), trunk (Nx*Ny, n_channels, n_basis)
@@ -164,10 +152,6 @@ class DeepONetDecoder(nn.Module):
 
         return out, coords
 
-    def train(self, mode=True):
-        """Override train to invalidate trunk cache when switching modes."""
-        self._invalidate_cache()
-        return super().train(mode)
 
 
 class LinearTransitionModel(nn.Module):

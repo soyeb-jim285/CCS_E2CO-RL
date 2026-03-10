@@ -198,6 +198,81 @@ def plot_r2_comparison(metrics, out_dir='outputs_comparison'):
     print("Plot: r2_comparison.png")
 
 
+def plot_r2_comparison_filtered(metrics, out_dir='outputs_comparison'):
+    """Well R² comparison — only wells with R² >= 0 (removes failed wells)."""
+    versions_with_data = [(vn, metrics[vn]) for vn in VERSION_NAMES
+                          if vn in metrics and 'well_r2' in metrics[vn]]
+    if not versions_with_data:
+        return
+
+    well_names = list(versions_with_data[0][1]['well_r2'].keys())
+    n_versions = len(versions_with_data)
+
+    # For each version, filter to wells with R² >= 0
+    fig, axes = plt.subplots(1, 2, figsize=(20, 8))
+
+    # Left: grouped bar chart with only non-negative R² wells
+    # Find wells where ALL versions have R² >= 0
+    common_good_wells = []
+    for w in well_names:
+        all_good = all(m.get('well_r2', {}).get(w, -1) >= 0
+                       for _, m in versions_with_data)
+        if all_good:
+            common_good_wells.append(w)
+
+    if common_good_wells:
+        n_wells = len(common_good_wells)
+        x = np.arange(n_wells)
+        width = 0.8 / n_versions
+
+        for i, (vname, m) in enumerate(versions_with_data):
+            idx = VERSION_NAMES.index(vname)
+            short = SHORT_NAMES[idx] if idx < len(SHORT_NAMES) else vname
+            r2_vals = [m['well_r2'].get(w, 0) for w in common_good_wells]
+            axes[0].bar(x + i * width, r2_vals, width,
+                       label=short, color=COLORS[idx % len(COLORS)], alpha=0.8)
+
+        axes[0].set_xlabel('Well', fontsize=14)
+        axes[0].set_ylabel('R²', fontsize=14)
+        axes[0].set_title('Well R² (only wells with R² ≥ 0 across all versions)', fontsize=13)
+        axes[0].set_xticks(x + width * n_versions / 2)
+        axes[0].set_xticklabels(common_good_wells, rotation=45)
+        axes[0].legend(fontsize=9)
+        axes[0].set_ylim(0, 1.05)
+        axes[0].grid(True, alpha=0.3, axis='y')
+
+    # Right: average R² per version (excluding negative wells per version)
+    labels = []
+    avg_r2_filtered = []
+    n_good_wells = []
+    for vname, m in versions_with_data:
+        idx = VERSION_NAMES.index(vname)
+        labels.append(SHORT_NAMES[idx] if idx < len(SHORT_NAMES) else vname)
+        r2_all = list(m.get('well_r2', {}).values())
+        r2_good = [v for v in r2_all if v >= 0]
+        avg_r2_filtered.append(np.mean(r2_good) if r2_good else 0)
+        n_good_wells.append(len(r2_good))
+
+    x = np.arange(len(labels))
+    colors_bar = [COLORS[VERSION_NAMES.index(vn) % len(COLORS)] for vn, _ in versions_with_data]
+    bars = axes[1].bar(x, avg_r2_filtered, color=colors_bar, alpha=0.8)
+    for bar, n in zip(bars, n_good_wells):
+        axes[1].text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
+                    f'{n} wells', ha='center', va='bottom', fontsize=9)
+    axes[1].set_xticks(x)
+    axes[1].set_xticklabels(labels)
+    axes[1].set_title('Average R² (excluding negative R² wells)', fontsize=13)
+    axes[1].set_ylabel('Average R²')
+    axes[1].set_ylim(0, 1.05)
+    axes[1].grid(True, alpha=0.3, axis='y')
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, 'r2_comparison_filtered.png'),
+                dpi=150, bbox_inches='tight')
+    plt.close()
+    print("Plot: r2_comparison_filtered.png")
+
+
 def plot_radar_chart(metrics, out_dir='outputs_comparison'):
     """Multi-metric normalized radar chart."""
     versions_with_data = [(vn, metrics[vn]) for vn in VERSION_NAMES if vn in metrics]
@@ -327,6 +402,7 @@ def main():
     plot_training_curves_overlay(metrics, args.base_dir, args.out_dir)
     plot_per_timestep_comparison(metrics, args.out_dir)
     plot_r2_comparison(metrics, args.out_dir)
+    plot_r2_comparison_filtered(metrics, args.out_dir)
     plot_radar_chart(metrics, args.out_dir)
     plot_metric_bars(metrics, args.out_dir)
 

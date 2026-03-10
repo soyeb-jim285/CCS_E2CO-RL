@@ -108,20 +108,26 @@ class SpectralPhysicsLoss(nn.Module):
         ]
         self.register_buffer('_lambdas', torch.tensor(lambda_vals, dtype=torch.float32))
 
+    @torch.amp.autocast('cuda', enabled=False)
     def _spectral_derivative_x(self, field):
         """Compute df/dx via spectral method. field: (B, 1, Nx, Ny)."""
+        field = field.float()
         f_hat = torch.fft.rfft2(field)
         df_hat = 1j * self.kx_grid * f_hat
         return torch.fft.irfft2(df_hat, s=(field.shape[-2], field.shape[-1]))
 
+    @torch.amp.autocast('cuda', enabled=False)
     def _spectral_derivative_y(self, field):
         """Compute df/dy via spectral method. field: (B, 1, Nx, Ny)."""
+        field = field.float()
         f_hat = torch.fft.rfft2(field)
         df_hat = 1j * self.ky_grid * f_hat
         return torch.fft.irfft2(df_hat, s=(field.shape[-2], field.shape[-1]))
 
+    @torch.amp.autocast('cuda', enabled=False)
     def _spectral_laplacian(self, field):
         """Compute d2f/dx2 + d2f/dy2 via spectral method."""
+        field = field.float()
         f_hat = torch.fft.rfft2(field)
         lap_hat = -(self.kx_grid ** 2 + self.ky_grid ** 2) * f_hat
         return torch.fft.irfft2(lap_hat, s=(field.shape[-2], field.shape[-1]))

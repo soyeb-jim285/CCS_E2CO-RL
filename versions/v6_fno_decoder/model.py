@@ -86,7 +86,10 @@ class SpectralConv2d(nn.Module):
         # (B, in, x, y), (in, out, x, y) -> (B, out, x, y)
         return torch.einsum("bixy,ioxy->boxy", input, weights)
 
+    @torch.amp.autocast('cuda', enabled=False)
     def forward(self, x):
+        # Disable AMP: cfloat parameters are incompatible with fp16
+        x = x.float()
         batchsize = x.shape[0]
         # FFT
         x_ft = torch.fft.rfft2(x)

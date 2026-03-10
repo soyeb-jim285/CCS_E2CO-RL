@@ -32,6 +32,7 @@ def add_extra_args(parser):
 cfg = BaseConfig.from_args(extra_args_fn=add_extra_args)
 cfg.version_name = "v4_neural_ode"
 cfg.use_compile = False  # torchdiffeq incompatible with torch.compile
+cfg.use_amp = False      # torchdiffeq adaptive solver incompatible with fp16
 
 print(f"=== V4 Neural ODE E2CO ===")
 print(f"Working directory: {os.getcwd()}")

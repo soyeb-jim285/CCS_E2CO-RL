@@ -9,7 +9,7 @@
 #   - GPU with >= 24GB VRAM (each wave uses ~6-9GB)
 #   - torchdiffeq installed (for V4)
 
-set -e
+# No set -e: background jobs may fail individually; we check after each wave
 
 # Parse optional epoch override
 EPOCHS="${1:-200}"
@@ -81,11 +81,13 @@ PIDS+=($!)
 
 python -m versions.v1_physics_constrained.train \
     $COMMON --output_dir outputs_v1_physics_constrained/ --batch_size 32 \
+    --no_adaptive_weights \
     > outputs_v1_physics_constrained.log 2>&1 &
 PIDS+=($!)
 
 python -m versions.v2_physics_encoder.train \
     $COMMON --output_dir outputs_v2_physics_encoder/ --batch_size 32 \
+    --no_adaptive_weights \
     > outputs_v2_physics_encoder.log 2>&1 &
 PIDS+=($!)
 
@@ -121,18 +123,21 @@ PIDS=()
 
 python -m versions.v3_physics_corrector.train \
     $COMMON --output_dir outputs_v3_physics_corrector/ --batch_size 32 \
+    --no_adaptive_weights \
     --n_corrector_iterations 2 --corrector_alpha 0.1 \
     > outputs_v3_physics_corrector.log 2>&1 &
 PIDS+=($!)
 
 python -m versions.v4_neural_ode.train \
     $COMMON --output_dir outputs_v4_neural_ode/ --batch_size 32 \
+    --no_adaptive_weights \
     --ode_method dopri5 --no_compile \
     > outputs_v4_neural_ode.log 2>&1 &
 PIDS+=($!)
 
 python -m versions.v5_coordinate_pinn.train \
     $COMMON --output_dir outputs_v5_coordinate_pinn/ --batch_size 32 \
+    --no_adaptive_weights \
     --n_collocation_points 256 --lambda_consistency 0.1 \
     > outputs_v5_coordinate_pinn.log 2>&1 &
 PIDS+=($!)
@@ -168,12 +173,14 @@ PIDS=()
 
 python -m versions.v6_fno_decoder.train \
     $COMMON --output_dir outputs_v6_fno_decoder/ --batch_size 32 \
+    --no_adaptive_weights \
     --fno_modes 12 --fno_width 32 \
     > outputs_v6_fno_decoder.log 2>&1 &
 PIDS+=($!)
 
 python -m versions.v7_deeponet.train \
     $COMMON --output_dir outputs_v7_deeponet/ --batch_size 32 \
+    --no_adaptive_weights \
     --n_basis 64 --trunk_dim 128 \
     > outputs_v7_deeponet.log 2>&1 &
 PIDS+=($!)

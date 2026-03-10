@@ -32,6 +32,7 @@ def add_extra_args(parser):
 
 cfg = BaseConfig.from_args(extra_args_fn=add_extra_args)
 cfg.version_name = "v5_coordinate_pinn"
+cfg.use_compile = False  # autograd.grad with create_graph incompatible with torch.compile
 
 print(f"=== V5 Coordinate PINN E2CO ===")
 print(f"Working directory: {os.getcwd()}")
