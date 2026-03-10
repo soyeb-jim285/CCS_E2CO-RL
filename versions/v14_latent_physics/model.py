@@ -4,7 +4,10 @@ import os
 import glob
 import torch
 import torch.nn as nn
-from torchdiffeq import odeint_adjoint as odeint
+try:
+    from torchdiffeq import odeint_adjoint as odeint
+except ImportError:
+    raise ImportError("V14 requires torchdiffeq: pip install torchdiffeq")
 
 from versions.shared.layers import (
     conv_bn_relu, ResidualConv, dconv_bn_nolinear, fc_bn_relu

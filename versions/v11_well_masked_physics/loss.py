@@ -188,19 +188,13 @@ class WellMaskedPhysicsLoss(nn.Module):
         flux_y = (p[:, :, :, 1:] - p[:, :, :, :-1]) * ty
         flux_x_pred = (p_pred[:, :, 1:, :] - p_pred[:, :, :-1, :]) * tx
         flux_y_pred = (p_pred[:, :, :, 1:] - p_pred[:, :, :, :-1]) * ty
-        # Apply well mask (crop to match flux dimensions)
-        mask_x = self.well_mask[:, :, :, :-1] * self.well_mask[:, :, :, 1:]  # conservative
-        mask_y = self.well_mask[:, :, :-1, :] * self.well_mask[:, :, 1:, :]
-        # Use min of adjacent cells' masks
+        # Apply well mask: min of adjacent cells (flux_x is diff along dim 2, flux_y along dim 3)
+        mask_x = self.well_mask[:, :, 1:, :] * self.well_mask[:, :, :-1, :]  # (1,1,63,64)
+        mask_y = self.well_mask[:, :, :, 1:] * self.well_mask[:, :, :, :-1]  # (1,1,64,63)
         diff_x = torch.abs(flux_x - flux_x_pred)
         diff_y = torch.abs(flux_y - flux_y_pred)
-        # Mask shape may differ, crop to match
-        Nx_f = diff_x.shape[2]
-        Ny_f = diff_x.shape[3]
-        mask_x_crop = mask_x[:, :, :Nx_f, :Ny_f]
-        mask_y_crop = mask_y[:, :, :diff_y.shape[2], :diff_y.shape[3]]
-        loss_x = torch.sum((diff_x * mask_x_crop).reshape(p.size(0), -1), dim=-1)
-        loss_y = torch.sum((diff_y * mask_y_crop).reshape(p.size(0), -1), dim=-1)
+        loss_x = torch.sum((diff_x * mask_x).reshape(p.size(0), -1), dim=-1)
+        loss_y = torch.sum((diff_y * mask_y).reshape(p.size(0), -1), dim=-1)
         return torch.mean(loss_x + loss_y)
 
     def losses_to_dict(self, losses_stack):
