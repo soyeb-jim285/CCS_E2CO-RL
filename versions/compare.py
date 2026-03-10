@@ -40,9 +40,11 @@ def print_summary_table(metrics):
     print("COMPARISON SUMMARY")
     print("=" * 100)
 
-    header = f"{'Version':<25} {'Sat RMSE':>10} {'Sat MAE':>10} {'Pres RMSE':>12} {'Pres MAE':>12} {'Avg R²':>8} {'Time(s)':>10} {'Final Loss':>12}"
+    header = (f"{'Version':<25} {'Sat RMSE':>10} {'Sat MAE':>10} {'Pres RMSE':>12} "
+              f"{'Pres MAE':>12} {'Avg R²':>8} {'R²(≥0)':>8} {'#Wells':>6} "
+              f"{'Time(s)':>10} {'Final Loss':>12}")
     print(header)
-    print("-" * 100)
+    print("-" * 115)
 
     for vname in VERSION_NAMES:
         if vname not in metrics:
@@ -53,11 +55,18 @@ def print_summary_table(metrics):
         fl = m.get('final_train_loss')
         fl_str = f"{fl:.4f}" if fl is not None else "N/A"
 
+        # Filtered R²: exclude negative wells
+        r2_all = list(m.get('well_r2', {}).values())
+        r2_good = [v for v in r2_all if v >= 0]
+        avg_r2_filt = np.mean(r2_good) if r2_good else 0.0
+        n_good = len(r2_good)
+
         print(f"{vname:<25} {m['sat_rmse']:>10.4f} {m['sat_mae']:>10.4f} "
               f"{m['pres_rmse_psia']:>12.2f} {m['pres_mae_psia']:>12.2f} "
-              f"{m['avg_well_r2']:>8.3f} {t_str:>10} {fl_str:>12}")
+              f"{m['avg_well_r2']:>8.3f} {avg_r2_filt:>8.3f} {n_good:>6} "
+              f"{t_str:>10} {fl_str:>12}")
 
-    print("=" * 100)
+    print("=" * 115)
 
 
 def save_summary_csv(metrics, out_path):
@@ -67,6 +76,8 @@ def save_summary_csv(metrics, out_path):
         if vname not in metrics:
             continue
         m = metrics[vname]
+        r2_all = list(m.get('well_r2', {}).values())
+        r2_good = [v for v in r2_all if v >= 0]
         rows.append({
             'version': vname,
             'sat_rmse': m['sat_rmse'],
@@ -74,6 +85,8 @@ def save_summary_csv(metrics, out_path):
             'pres_rmse_psia': m['pres_rmse_psia'],
             'pres_mae_psia': m['pres_mae_psia'],
             'avg_well_r2': m['avg_well_r2'],
+            'avg_well_r2_filtered': np.mean(r2_good) if r2_good else 0.0,
+            'n_good_wells': len(r2_good),
             'train_time_seconds': m.get('train_time_seconds'),
             'final_train_loss': m.get('final_train_loss'),
             'epochs': m.get('epochs'),
