@@ -124,6 +124,10 @@ class BaseTrainer:
         print(f"  AMP={self.use_amp}, eval_every={eval_every} epochs")
 
         for e in range(self.start_epoch, cfg.epochs):
+            # Curriculum support: no-op for loss functions without set_epoch
+            if hasattr(self.loss_fn, 'set_epoch'):
+                self.loss_fn.set_epoch(e)
+
             epoch_start = time.time()
             self.model.train()
 

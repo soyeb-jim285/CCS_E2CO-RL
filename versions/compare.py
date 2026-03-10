@@ -12,12 +12,22 @@ VERSION_NAMES = [
     'v0_baseline', 'v1_physics_constrained', 'v2_physics_encoder',
     'v3_physics_corrector', 'v4_neural_ode', 'v5_coordinate_pinn',
     'v6_fno_decoder', 'v7_deeponet',
+    'v8_curriculum_pinn', 'v9_pressure_only_pinn', 'v10_enhanced_pinn',
+    'v11_well_masked_physics', 'v12_dual_latent', 'v13_physics_finetune',
+    'v14_latent_physics', 'v15_pino', 'v16_obs_weighted_physics',
 ]
 
-SHORT_NAMES = ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7']
+SHORT_NAMES = [
+    'V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7',
+    'V8', 'V9', 'V10', 'V11', 'V12', 'V13', 'V14', 'V15', 'V16',
+]
 
-COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728',
-          '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+COLORS = [
+    '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728',
+    '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
+    '#bcbd22', '#17becf', '#aec7e8', '#ffbb78',
+    '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2',
+]
 
 
 def load_metrics(base_dir='.'):
