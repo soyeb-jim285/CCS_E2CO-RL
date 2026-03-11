@@ -354,17 +354,31 @@ class BaseEvaluator:
             plt.yticks(fontsize=20)
 
             if i_well < num_prod:
-                plt.ylabel('STB/Day', fontsize=20)
-            elif i_well > num_prod * 2:
-                plt.ylabel('psia', fontsize=20)
+                unit = 'STB/Day'
+                plt.ylabel(unit, fontsize=20)
+            elif i_well >= num_prod * 2:
+                unit = 'psia'
+                plt.ylabel(unit, fontsize=20)
             else:
-                plt.ylabel('ft^3/Day', fontsize=20)
+                unit = 'ft³/Day'
+                plt.ylabel(unit, fontsize=20)
                 plt.ylim((-100000, 1500000))
 
             plt.legend(['prediction', 'true'], fontsize=20)
+
+            # Compute RMSE, MAE, NRMSE (%), and R²
             rmse = np.sqrt(np.mean((pred_vals - true_vals) ** 2))
             mae = np.mean(np.abs(pred_vals - true_vals))
-            plt.title(f'Well {i_well + 1} | RMSE={rmse:.2f}, MAE={mae:.2f}', fontsize=14)
+            val_range = true_vals.max() - true_vals.min()
+            nrmse_pct = (rmse / val_range * 100) if val_range > 1e-10 else float('inf')
+            ss_res = np.sum((true_vals - pred_vals) ** 2)
+            ss_tot = np.sum((true_vals - true_vals.mean()) ** 2)
+            r2 = 1.0 - ss_res / ss_tot if ss_tot > 1e-10 else float('nan')
+
+            plt.title(
+                f'Well {i_well + 1} | NRMSE={nrmse_pct:.1f}%, '
+                f'R²={r2:.3f}, RMSE={rmse:.1f} {unit}, MAE={mae:.1f} {unit}',
+                fontsize=14)
             plt.savefig(os.path.join(plot_dir, f'well_{i_well + 1}_case{eval_case}.png'),
                         dpi=150, bbox_inches='tight')
             plt.close()
