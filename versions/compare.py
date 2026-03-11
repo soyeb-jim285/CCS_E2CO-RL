@@ -15,11 +15,16 @@ VERSION_NAMES = [
     'v8_curriculum_pinn', 'v9_pressure_only_pinn', 'v10_enhanced_pinn',
     'v11_well_masked_physics', 'v12_dual_latent', 'v13_physics_finetune',
     'v14_latent_physics', 'v15_pino', 'v16_obs_weighted_physics',
+    'v17_finetune_ode', 'v18_finetune_fno', 'v19_perwell_mlp',
+    'v20_multistep_rollout', 'v21_well_features', 'v22_full_combo',
+    'v23_baseline_bs4', 'v24_baseline_bs8', 'v25_baseline_bs32',
 ]
 
 SHORT_NAMES = [
     'V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7',
     'V8', 'V9', 'V10', 'V11', 'V12', 'V13', 'V14', 'V15', 'V16',
+    'V17', 'V18', 'V19', 'V20', 'V21', 'V22',
+    'V23', 'V24', 'V25',
 ]
 
 COLORS = [
@@ -27,6 +32,8 @@ COLORS = [
     '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
     '#bcbd22', '#17becf', '#aec7e8', '#ffbb78',
     '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2',
+    '#393b79', '#637939', '#8c6d31', '#843c39', '#7b4173', '#5254a3',
+    '#e7969c', '#de9ed6', '#9c9ede',
 ]
 
 

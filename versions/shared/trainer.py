@@ -210,7 +210,7 @@ class BaseTrainer:
                     e + 1)
                 print(f"  New best model saved (loss={check_loss:.6f})")
 
-            if (e + 1) % cfg.checkpoint_every == 0:
+            if cfg.save_checkpoints and (e + 1) % cfg.checkpoint_every == 0:
                 ckpt_path = os.path.join(
                     cfg.checkpoint_dir, f"ckpt_epoch_{e + 1:04d}.pt")
                 self._save_checkpoint(ckpt_path, e + 1)

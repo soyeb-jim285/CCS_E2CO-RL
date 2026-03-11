@@ -51,6 +51,7 @@ class BaseConfig:
 
     # --- Checkpoint / resume ---
     checkpoint_every: int = 20
+    save_checkpoints: bool = True
     resume: bool = True
 
     # --- Physical constants ---
@@ -117,6 +118,7 @@ class BaseConfig:
         parser.add_argument("--checkpoint_every", type=int, default=cls.checkpoint_every)
         parser.add_argument("--eval_every", type=int, default=cls.eval_every)
         parser.add_argument("--no_resume", action="store_true")
+        parser.add_argument("--no_checkpoints", action="store_true")
         parser.add_argument("--no_adaptive_weights", action="store_true")
         parser.add_argument("--no_amp", action="store_true")
         parser.add_argument("--no_compile", action="store_true")
@@ -149,6 +151,7 @@ class BaseConfig:
             checkpoint_every=parsed.checkpoint_every,
             eval_every=parsed.eval_every,
             resume=not parsed.no_resume,
+            save_checkpoints=not parsed.no_checkpoints,
             use_adaptive_weights=not parsed.no_adaptive_weights,
             use_amp=not parsed.no_amp,
             use_compile=not parsed.no_compile,
